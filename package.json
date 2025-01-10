@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "bfg": "^0.3.0",
+    "git-filter-repo": "^0.0.30"
+  }
+}
