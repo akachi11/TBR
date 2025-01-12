@@ -1,23 +1,44 @@
 import React, { useContext, useState } from 'react'
 import axios from 'axios'
 import { useAuthContext } from '../context/AuthContext.tsx'
+import { PuffLoader } from 'react-spinners'
+import {useNavigate} from 'react-router-dom'
 
 const Login = () => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const {setUserState} = useAuthContext()
+  const { setUserState } = useAuthContext()
+  const navigate = useNavigate()
 
   const handleSubmit = async () => {
-    console.log(email)
-    const response = await axios.post('http://localhost:5000/api/auth/login',
-      {
-        email,
-        password
+    setLoading(true)
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login',
+        {
+          email,
+          password
+        }
+      )
+      setLoading(false)
+      setUserState(response.data)
+      navigate('/')
+    } catch (error) {
+      setLoading(false)
+      if (error.response.status === 401) {
+        setError('Wrong password')
+      } else if (error.response.status === 400) {
+        setError('Wrong email')
+      } else {
+        setError('Something went wrong')
       }
-    )
-    setUserState(response.data)
+      setTimeout(() => {
+        setError('')
+      }, 3000);
+    }
   }
 
   return (
@@ -31,13 +52,26 @@ const Login = () => {
           <div>
             <div className='my-4'>
               <label htmlFor='email' className='block font-baskervville text-zinc-400 text-sm'>Email</label>
-              <input onChange={(e) => {setEmail(e.target.value)}} type='email' id='email' className="bg-zinc-700 w-[100%] text-xs focus:border-none focus:outline-none text-zinc-400 p-[8px] rounded-lg" />
+              <input onChange={(e) => { setEmail(e.target.value) }} type='email' id='email' className="bg-zinc-700 w-[100%] text-xs focus:border-none focus:outline-none text-zinc-400 p-[8px] rounded-lg" />
             </div>
             <div className='my-4'>
               <label htmlFor='password' className='block font-baskervville text-zinc-400 text-sm'>Password</label>
-              <input onChange={(e) => {setPassword(e.target.value)}} type='password' id='password' className="bg-zinc-700 w-[100%] text-xs focus:border-none focus:outline-none text-zinc-400 p-[8px] rounded-lg" />
+              <input onChange={(e) => { setPassword(e.target.value) }} type='password' id='password' className="bg-zinc-700 w-[100%] text-xs focus:border-none focus:outline-none text-zinc-400 p-[8px] rounded-lg" />
             </div>
-            <button onClick={handleSubmit} className={`w-full p-2 ${(password !== "" && email !== "") ? "bg-zinc-900" : "bg-zinc-500"} text-white rounded-md font-baskervville`}>Login</button>
+            {error !== '' && <p className='text-red-400 text-xs font-jakarta mb-4'>{error}</p>}
+            <button disabled={(password === "" || email === "")} onClick={handleSubmit} className={`w-full p-2 ${(password !== "" && email !== "") ? "bg-zinc-900" : "bg-zinc-500"} text-white rounded-md font-baskervville`}>
+              {loading ?
+                <div className="flex flex-row items-center justify-center">
+                  <PuffLoader
+                    color={"#a1a1aa"}
+                    loading={loading}
+                    size={30}
+                    aria-label="Loading Spinner"
+                    data-testid="loader"
+                  />
+                </div>
+                : "Login"}
+            </button>
           </div>
         </div>
       </div>
