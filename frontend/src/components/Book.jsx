@@ -35,7 +35,7 @@ const Book = () => {
     try {
       const books = await axios
         .post(
-          "http://localhost:5000/api/book/",
+          "https://tbr-backend-73lw.onrender.com/api/book/",
           {
             email: user?.email,
           },
@@ -48,7 +48,6 @@ const Book = () => {
         .then((res) => {
           setLoadingBooks(false);
           toggleAllBooks(res.data);
-          console.log(res);
         });
     } catch (error) {
       console.log(error);
@@ -181,20 +180,21 @@ const Book = () => {
           : "To be read"}
       </p>
       <div className="flex flex-wrap m-auto">
-        {(filteredBooks?.length === 0  || filteredBooks === undefined)&& !loadingBooks && (
-          <div className="pb-8 mt-8 w-full flex flex-col items-center justify-center">
-            <img
-              src={img1}
-              alt=""
-              className="w-[200px] h-[200px] md:h-[400px] md:w-[400px] object-cover"
-            />
-            <p className="text-zinc-400 text-sm font-baskervville">
-              No books found
-            </p>
-          </div>
-        )}
+        {(filteredBooks?.length === 0 || filteredBooks === undefined) &&
+          !loadingBooks && (
+            <div className="pb-8 mt-8 w-full flex flex-col items-center justify-center">
+              <img
+                src={img1}
+                alt=""
+                className="w-[200px] h-[200px] md:h-[400px] md:w-[400px] object-cover"
+              />
+              <p className="text-zinc-400 text-sm font-baskervville">
+                No books found
+              </p>
+            </div>
+          )}
 
-        {loadingBooks && (
+        {loadingBooks ? (
           <div className="pb-8 mt-8 w-full flex flex-col items-center justify-center">
             <img
               src={img2}
@@ -205,36 +205,38 @@ const Book = () => {
               Fetching your books...
             </p>
           </div>
-        )}
-
-        {filteredBooks?.map(
-          (book, index) =>
-            book.isReading === false && (
-              <div
-                key={index}
-                className="cursor-pointer w-[calc(37%-1rem)] md:w-[calc(15%-1rem)] p-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleBook(book);
-                  toggleInfoModal(true);
-                }}
-              >
-                <img
-                  className="w-fit h-fit md:w-[100px] md:[150px] object-contain rounded-md"
-                  src={book.image}
-                  alt=""
-                />
-                <div className="text-white">
-                  <p className="text-zinc-400 text-sm font-baskervville">
-                    {book.authors}
-                  </p>
-                  <p className="font-jakarta text-xs font-bold">{book.title}</p>
-                  <p className="font-jakarta text-[10px] italic text-zinc-300">
-                    {book.subtitle}
-                  </p>
+        ) : (
+          filteredBooks?.map(
+            (book, index) =>
+              book.isReading === false && (
+                <div
+                  key={index}
+                  className="cursor-pointer w-[calc(37%-1rem)] md:w-[calc(15%-1rem)] p-4"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBook(book);
+                    toggleInfoModal(true);
+                  }}
+                >
+                  <img
+                    className="w-fit h-fit md:w-[100px] md:[150px] object-contain rounded-md"
+                    src={book.image}
+                    alt=""
+                  />
+                  <div className="text-white">
+                    <p className="text-zinc-400 text-sm font-baskervville">
+                      {book.authors}
+                    </p>
+                    <p className="font-jakarta text-xs font-bold">
+                      {book.title}
+                    </p>
+                    <p className="font-jakarta text-[10px] italic text-zinc-300">
+                      {book.subtitle}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )
+              )
+          )
         )}
       </div>
     </div>

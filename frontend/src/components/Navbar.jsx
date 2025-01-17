@@ -13,6 +13,7 @@ const Navbar = () => {
     navigate("/login")
     localStorage.removeItem("token")
     localStorage.removeItem("user")
+    selectPage("home")
   }
 
   return (
@@ -40,9 +41,7 @@ const Navbar = () => {
           <p className="text-sm hidden md:block">Bookmarked</p>
         </div>
         <div
-          className={`flex-1 flex hover:bg-zinc-800 gap-2 cursor-pointer md:text-3xl items-center justify-center text-3xl p-2 ${
-            page === "bookmarked" ? "bg-zinc-800" : ""
-          }`}
+          className={"flex-1 flex hover:bg-zinc-800 gap-2 cursor-pointer md:text-3xl items-center justify-center text-3xl p-2"}
           onClick={logout}
         >
           <IoLogOutSharp />

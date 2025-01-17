@@ -17,7 +17,7 @@ const Register = () => {
     const handleSubmit = async () => {
         setLoading(true)
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register',
+            const response = await axios.post('https://tbr-backend-73lw.onrender.com/api/auth/register',
                 {
                     email: email,
                     password: password,
