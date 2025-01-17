@@ -25,6 +25,8 @@ const Login = () => {
       )
       setLoading(false)
       setUserState(response.data)
+      localStorage.setItem('user', JSON.stringify(response.data))
+      localStorage.setItem('token', response.data.token)
       navigate('/')
     } catch (error) {
       setLoading(false)

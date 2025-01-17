@@ -16,6 +16,7 @@ const UserSchema = new Schema({
       image: { type: String, required: true },
       isFavorite: { type: Boolean, default: false },
       isReading: { type: Boolean, default: false },
+      isCompleted: { type: Boolean, default: false },
       toBeRead: { type: Boolean, default: false },
       desc: { type: String, required: true },
     },

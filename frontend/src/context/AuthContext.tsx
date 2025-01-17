@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useState, useContext, ReactNode, Dispatch, SetStateAction, useEffect } from 'react';
 
 // Define the shape of the AuthContext
 interface AuthContextType {
@@ -10,10 +10,10 @@ interface AuthContextType {
 
 // Define the shape of the User object
 interface UserType {
-  id: string;
-  name: string;
+  _id: string;
   email: string;
-  // Add any other fields as necessary
+  firstName: string;
+  lastName: string;
 }
 
 // Create the AuthContext with a default value of undefined
@@ -26,6 +26,16 @@ interface AuthContextProviderProps {
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserType | undefined>(undefined);
+
+  useEffect(() => {
+    setUser(() => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        return JSON.parse(user);
+      }
+      return undefined;
+    });
+  }, [])
 
   return (
     <AuthContext.Provider

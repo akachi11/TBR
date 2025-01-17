@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useBookContext } from "../context/BookContext";
 import axios from "axios";
 import { PuffLoader } from "react-spinners";
+import { useAuthContext } from "../context/AuthContext.tsx";
+import img1 from "../assets/rb_4170.png";
+import img2 from "../assets/rb_44889.png";
 
 const Book = () => {
   const {
@@ -13,8 +16,11 @@ const Book = () => {
     allBooks,
   } = useBookContext();
   const [loading, setLoading] = useState(false);
+  const [loadingBooks, setLoadingBooks] = useState(false);
   const [searchVal, setSearchVal] = useState();
   const [searchResult, setSearchResult] = useState();
+  const { user } = useAuthContext();
+  const [filteredBooks, setFilteredBooks] = useState([]);
 
   const searchRef = useRef(null);
 
@@ -25,16 +31,44 @@ const Book = () => {
   };
 
   const getAllBooks = async () => {
+    setLoadingBooks(true);
     try {
       const books = await axios
-        .get("http://localhost:5000/api/book/")
+        .post(
+          "http://localhost:5000/api/book/",
+          {
+            email: user?.email,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
+          setLoadingBooks(false);
           toggleAllBooks(res.data);
+          console.log(res);
         });
     } catch (error) {
       console.log(error);
+      setLoadingBooks(false);
     }
   };
+
+  useEffect(() => {
+    if (page === "completed") {
+      setFilteredBooks(allBooks?.filter((book) => book.isCompleted === true));
+    } else if (page === "bookmarked") {
+      setFilteredBooks(allBooks?.filter((book) => book.isFavorite === true));
+    } else if (page === "home") {
+      setFilteredBooks(allBooks?.filter((book) => book.toBeRead === true));
+    }
+  }, [page, allBooks]);
+
+  useEffect(() => {
+    getAllBooks();
+  }, [user?.email]);
 
   useEffect(() => {
     getAllBooks();
@@ -50,34 +84,32 @@ const Book = () => {
     setLoading(true);
     const formattedText = text.replace(/\s+/g, "+");
 
-    console.log(formattedText);
-
     try {
       const response = await axios
         .get(
           `https://www.googleapis.com/books/v1/volumes?q=${formattedText}&maxResults=10`
         )
         .then((res) => {
+          console.log(res);
           setLoading(false);
           const bookData = res?.data.items.map((item) => {
             const volumeInfo = item.volumeInfo;
             return {
               id: item.id,
               title: volumeInfo.title,
-              subtitle: volumeInfo.subtitle || "No Subtitle",
-              authors: volumeInfo.authors || ["No authors available"],
-              pageCount: volumeInfo.pageCount || "No page count available",
-              categories: volumeInfo.categories || ["No categories available"],
-              averageRating: volumeInfo.averageRating || "No rating available",
+              subtitle: volumeInfo.subtitle,
+              authors: volumeInfo.authors,
+              pageCount: volumeInfo.pageCount,
+              categories: volumeInfo.categories,
+              averageRating: volumeInfo.averageRating,
               image: volumeInfo.imageLinks
                 ? volumeInfo.imageLinks.thumbnail
                 : "https://via.placeholder.com/128x200?text=No+Image",
-              desc: volumeInfo.description || "No description",
+              desc: volumeInfo.description,
             };
           });
 
           setSearchResult(bookData);
-          console.log(bookData[0])
         });
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -143,21 +175,47 @@ const Book = () => {
       </div>
       <p className="text-zinc-200 px-4 mb-2 font-baskervville text-xl">
         {page === "completed"
-          ? "Completerd"
+          ? "Completed"
           : page === "bookmarked"
           ? "Bookmarked"
           : "To be read"}
       </p>
       <div className="flex flex-wrap m-auto">
-        {allBooks?.map(
+        {(filteredBooks?.length === 0  || filteredBooks === undefined)&& !loadingBooks && (
+          <div className="pb-8 mt-8 w-full flex flex-col items-center justify-center">
+            <img
+              src={img1}
+              alt=""
+              className="w-[200px] h-[200px] md:h-[400px] md:w-[400px] object-cover"
+            />
+            <p className="text-zinc-400 text-sm font-baskervville">
+              No books found
+            </p>
+          </div>
+        )}
+
+        {loadingBooks && (
+          <div className="pb-8 mt-8 w-full flex flex-col items-center justify-center">
+            <img
+              src={img2}
+              alt=""
+              className="w-[200px] h-[200px] md:h-[400px] md:w-[400px] object-cover animate-pulseImage"
+            />
+            <p className="text-zinc-400 text-sm font-baskervville">
+              Fetching your books...
+            </p>
+          </div>
+        )}
+
+        {filteredBooks?.map(
           (book, index) =>
             book.isReading === false && (
               <div
                 key={index}
-                className="w-[calc(37%-1rem)] md:w-[calc(15%-1rem)] p-4"
+                className="cursor-pointer w-[calc(37%-1rem)] md:w-[calc(15%-1rem)] p-4"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleBook(book)
+                  toggleBook(book);
                   toggleInfoModal(true);
                 }}
               >
@@ -170,10 +228,10 @@ const Book = () => {
                   <p className="text-zinc-400 text-sm font-baskervville">
                     {book.authors}
                   </p>
-                  <p className="font-jakarta text-xs font-bold">
-                    {book.title}
+                  <p className="font-jakarta text-xs font-bold">{book.title}</p>
+                  <p className="font-jakarta text-[10px] italic text-zinc-300">
+                    {book.subtitle}
                   </p>
-                  <p className="font-jakarta text-[10px] italic text-zinc-300">{book.subtitle}</p>
                 </div>
               </div>
             )
