@@ -3,18 +3,24 @@ import ProgressIndicator from "./ProgressIndicator";
 import { useBookContext } from "../context/BookContext";
 
 const CurrentBook = () => {
-  const { allBooks } = useBookContext();
+  const { allBooks, toggleBook, toggleInfoModal } = useBookContext();
 
   const reading = allBooks?.filter((item) => item.isReading === true)[0];
 
   return (
     <>
       {reading && (
-        <div className="md:px-20 md:py-10">
+        <div className="md:px-20 md:py-0">
           <p className="text-zinc-200 px-4 mb-2 font-baskervville text-xl">
             Reading
           </p>
-          <div className="px-4 flex gap-2 mb-4">
+          <div className="cursor-pointer px-4 flex gap-2 mb-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleBook(reading);
+            toggleInfoModal(true);
+          }}
+          >
             <img
               className="w-[70px] h-[100px] object-contain rounded-md"
               src={reading.image}

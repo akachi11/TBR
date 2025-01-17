@@ -7,8 +7,6 @@ const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 export const authenticateJWT = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
-    console.log(token, SECRET_KEY);
-
     if (!token) {
         return res.status(401).json({ message: "Access Denied" });
     }

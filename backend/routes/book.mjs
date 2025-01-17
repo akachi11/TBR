@@ -8,10 +8,9 @@ const User = Users;
 const router = Router();
 
 // GET ALL
-router.get("/", authenticateJWT, async (req, res) => {
+router.post("/", authenticateJWT, async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    console.log(user);
     res.status(200).json(user.books);
   } catch (error) {
     res.status(500).json(error);
@@ -43,7 +42,6 @@ router.patch("/addFavorites", authenticateJWT, async (req, res) => {
       const existingBook = user.books.some((book) => book.id === req.body.id);
       if (!existingBook) {
         try {
-          console.log(savedBook);
           // Update the user's books array
           const update = await User.findOneAndUpdate(
             { email: req.body.email },
@@ -82,7 +80,6 @@ router.patch("/addFavorites", authenticateJWT, async (req, res) => {
     res.status(500).json(error);
   }
 });
-
 
 // REMOVE FROM FAVORITES
 router.patch("/removeFavorites", authenticateJWT, async (req, res) => {
@@ -149,7 +146,6 @@ router.patch("/addToReadlist", authenticateJWT, async (req, res) => {
       const existingBook = user.books.some((book) => book.id === req.body.id);
       if (!existingBook) {
         try {
-          console.log(savedTBR);
           // Update the user's books array
           const update = await User.findOneAndUpdate(
             { email: req.body.email },
@@ -229,6 +225,46 @@ router.patch("/removeFromReadlist", authenticateJWT, async (req, res) => {
 });
 
 // START READING
+// router.patch("/startReading", authenticateJWT, async (req, res) => {
+//   try {
+//     // Find the user by email
+//     const user = await User.findOne({ email: req.body.email });
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Check if any book is already being read
+//     const currentlyReading = user.books.find((book) => book.isReading);
+
+//     if (currentlyReading) {
+//       return res.status(409).json({ message: "Already reading a book" });
+//     }
+
+//     // Find the book in the user's books array
+//     const bookIndex = user.books.findIndex((book) => book.id === req.body.id);
+
+//     if (bookIndex === -1) {
+//       return res.status(404).json({ message: "Book not found in user's list" });
+//     }
+
+//     // Update the book's isReading status
+//     user.books[bookIndex] = {
+//       ...user.books[bookIndex].toObject(),
+//       isReading: true,
+//     };
+
+//     // Save the updated user document
+//     await user.save();
+
+//     return res.status(200).json({
+//       message: "Book marked as currently reading",
+//       book: user.books[bookIndex],
+//     });
+//   } catch (error) {
+//     return res.status(500).json({ message: "Something went wrong", error });
+//   }
+// });
 router.patch("/startReading", authenticateJWT, async (req, res) => {
   try {
     // Find the user by email
@@ -249,10 +285,34 @@ router.patch("/startReading", authenticateJWT, async (req, res) => {
     const bookIndex = user.books.findIndex((book) => book.id === req.body.id);
 
     if (bookIndex === -1) {
-      return res.status(404).json({ message: "Book not found in user's list" });
+      // If the book is not found in the user's list, create a new book
+      const newBook = {
+        id: req.body.id,
+        authors: req.body.authors,
+        title: req.body.title,
+        subtitle: req.body.subtitle,
+        pageCount: req.body.pageCount,
+        categories: req.body.categories,
+        averageRating: req.body.averageRating,
+        image: req.body.image,
+        isFavorite: req.body.isFavorite || false,
+        isReading: true, // Set as currently reading
+        toBeRead: req.body.toBeRead || false,
+        desc: req.body.desc,
+      };
+
+      user.books.push(newBook);
+
+      // Save the updated user document
+      await user.save();
+
+      return res.status(201).json({
+        message: "Book added and marked as currently reading",
+        book: newBook,
+      });
     }
 
-    // Update the book's isReading status
+    // If the book exists, update the book's isReading status
     user.books[bookIndex] = {
       ...user.books[bookIndex].toObject(),
       isReading: true,
@@ -263,6 +323,78 @@ router.patch("/startReading", authenticateJWT, async (req, res) => {
 
     return res.status(200).json({
       message: "Book marked as currently reading",
+      book: user.books[bookIndex],
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong", error });
+  }
+});
+
+
+// STOP READING
+router.patch("/stopReading", authenticateJWT, async (req, res) => {
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the book in the user's books array
+    const bookIndex = user.books.findIndex((book) => book.id === req.body.id);
+
+    if (bookIndex === -1) {
+      return res.status(404).json({ message: "Book not found in user's list" });
+    }
+
+    // Update the book's isReading status
+    user.books[bookIndex] = {
+      ...user.books[bookIndex].toObject(),
+      isReading: false,
+    };
+
+    // Save the updated user document
+    await user.save();
+
+    return res.status(200).json({
+      message: "Book marked as not currently reading",
+      book: user.books[bookIndex],
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong", error });
+  }
+});
+
+// MARK AS COMPLETED
+router.patch("/markAsCompleted", authenticateJWT, async (req, res) => {
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the book in the user's books array
+    const bookIndex = user.books.findIndex((book) => book.id === req.body.id);
+
+    if (bookIndex === -1) {
+      return res.status(404).json({ message: "Book not found in user's list" });
+    }
+
+    // Update the book's isCompleted status
+    user.books[bookIndex] = {
+      ...user.books[bookIndex].toObject(),
+      isReading: false, // Stop reading the book as it's completed
+      isCompleted: true,
+    };
+
+    // Save the updated user document
+    await user.save();
+
+    return res.status(200).json({
+      message: "Book marked as completed",
       book: user.books[bookIndex],
     });
   } catch (error) {

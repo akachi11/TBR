@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import "./App.css";
-import Navbar from "./components/Navbar";
-import Book from "./components/Book";
-import CurrentBook from "./components/CurrentBook.jsx";
-import BookInfoModal from "./components/BookInfoModal.jsx";
-import { useBookContext } from "./context/BookContext.jsx";
+import Home from "./pages/Home.tsx";
+import Login from "./pages/Login.tsx";
+import { Route, Routes } from "react-router-dom";
+import Register from "./pages/Register.tsx";
 
 function App() {
-  const { page, selectPage, infoModal } = useBookContext();
 
   return (
     <div className="min-h-screen bg-zinc-900 relative">
-      <Navbar />
-      {page === "home" && <CurrentBook />}
-      <Book />
-      {infoModal && <BookInfoModal />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
     </div>
   );
 }
