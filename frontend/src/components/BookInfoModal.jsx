@@ -46,7 +46,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/addFavorites",
+            "http://localhost:5000/api/book/addFavorites",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -60,7 +60,7 @@ const BookInfoModal = () => {
               isFavorite: true,
               isReading: selectedBook.isReading,
               toBeRead: selectedBook.toBeRead,
-              desc: selectedBook.desc,
+              desc: selectedBook.desc ?? "No description",
             },
             {
               headers: {
@@ -86,7 +86,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/removeFavorites",
+            "http://localhost:5000/api/book/removeFavorites",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -119,7 +119,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/removeFromReadlist",
+            "http://localhost:5000/api/book/removeFromReadlist",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -148,7 +148,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/addToReadlist",
+            "http://localhost:5000/api/book/addToReadlist",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -162,7 +162,7 @@ const BookInfoModal = () => {
               isFavorite: selectedBook.isFavorite,
               isReading: selectedBook.isReading,
               toBeRead: true,
-              desc: selectedBook.desc,
+              desc: selectedBook.desc ?? "No description",
             },
             {
               headers: {
@@ -192,7 +192,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/stopReading",
+            "http://localhost:5000/api/book/stopReading",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -221,7 +221,7 @@ const BookInfoModal = () => {
       try {
         const res = await axios
           .patch(
-            "https://tbr-backend-73lw.onrender.com/api/book/startReading",
+            "http://localhost:5000/api/book/startReading",
             {
               email: user?.email,
               id: selectedBook.id,
@@ -265,7 +265,7 @@ const BookInfoModal = () => {
   
     try {
       const res = await axios.patch(
-        "https://tbr-backend-73lw.onrender.com/api/book/markAsCompleted",
+        "http://localhost:5000/api/book/markAsCompleted",
         {
           email: user?.email,
           id: selectedBook.id,
